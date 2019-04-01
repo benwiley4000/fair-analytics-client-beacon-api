@@ -42,17 +42,34 @@ export default function fairAnalytics ({ url } = {}) {
     console.warn('Error while setting anonymousSessionId, "NA" will be used', e)
   }
 
-  const send = (opts = {}) => {
+  const send = (opts = {}, guaranteeRequest = false) => {
     if (!opts.event) {
       return Promise.reject(new Error('You must provide the "event" parameter'))
     }
     opts.anonymousSessionId = anonymousSessionId
+    const body = JSON.stringify(opts)
+    const contentType = 'application/json'
+    if (guaranteeRequest) {
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body], { type: contentType })
+        if (navigator.sendBeacon(url, blob)) {
+          return Promise.resolve({})
+        } else {
+          return Promise.reject(new Error('Failed to queue event'))
+        }
+      }
+      // fallback to synchronous XMLHttpRequest
+      const client = new XMLHttpRequest()
+      client.open('POST', url, false)
+      client.setRequestHeader('Content-Type', contentType)
+      client.send(body)
+    }
     return fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': contentType
       },
-      body: JSON.stringify(opts)
+      body
     }).then(checkStatus)
   }
 
