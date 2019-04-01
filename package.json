@@ -74,7 +74,8 @@
       "test",
       "describe",
       "Blob",
-      "XMLHttpRequest"
+      "XMLHttpRequest",
+      "encodeURIComponent"
     ]
   },
   "jest": {
