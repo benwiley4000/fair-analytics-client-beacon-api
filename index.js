@@ -67,9 +67,20 @@ export default function fairAnalytics ({ url } = {}) {
       }
       // fallback to synchronous XMLHttpRequest
       const client = new XMLHttpRequest()
-      client.open('POST', url, false)
-      client.setRequestHeader('Content-Type', 'application/json')
-      client.send(JSON.stringify(opts))
+      let sent
+      try {
+        client.open('POST', url, false)
+        client.setRequestHeader('Content-Type', 'application/json')
+        client.send(JSON.stringify(opts))
+        client.ok = client.status < 400
+        sent = true
+      } catch (err) {
+        // fall through to fetch as a last resort if sync XHR fails
+        sent = false
+      }
+      if (sent) {
+        return Promise.resolve(checkStatus(client))
+      }
     }
     return fetch(url, {
       method: 'POST',
