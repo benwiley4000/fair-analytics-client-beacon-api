@@ -47,18 +47,13 @@ export default function fairAnalytics ({ url } = {}) {
       return Promise.reject(new Error('You must provide the "event" parameter'))
     }
     opts.anonymousSessionId = anonymousSessionId
+    const body = JSON.stringify(opts)
+    const contentType = 'application/json'
     if (guaranteeRequest) {
       if (navigator.sendBeacon) {
-        // urlencoded b/c sendBeacon json not always supported in browsers:
+        // text b/c sendBeacon json not always supported in browsers:
         // http://crbug.com/490015
-        const encoded = Object.keys(opts)
-          .map(key => {
-            return encodeURIComponent(key) + '=' + encodeURIComponent(opts[key])
-          })
-          .join('&')
-        const blob = new Blob([encoded], {
-          type: 'application/x-www-form-urlencoded'
-        })
+        const blob = new Blob([body], { type: 'text/plain; charset=UTF-8' })
         if (navigator.sendBeacon(url, blob)) {
           return Promise.resolve({})
         } else {
@@ -70,8 +65,8 @@ export default function fairAnalytics ({ url } = {}) {
       let sent
       try {
         client.open('POST', url, false)
-        client.setRequestHeader('Content-Type', 'application/json')
-        client.send(JSON.stringify(opts))
+        client.setRequestHeader('Content-Type', contentType)
+        client.send(body)
         client.ok = client.status < 400
         sent = true
       } catch (err) {
@@ -85,9 +80,9 @@ export default function fairAnalytics ({ url } = {}) {
     return fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': contentType
       },
-      body: JSON.stringify(opts)
+      body
     }).then(checkStatus)
   }
 
