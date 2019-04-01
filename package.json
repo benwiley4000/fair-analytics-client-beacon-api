@@ -1,7 +1,7 @@
 {
   "name": "@benwiley4000/fair-analytics-client-beacon-api",
   "amdName": "fairAnalytics",
-  "version": "1.1.0-beacon",
+  "version": "1.1.0-beacon.1",
   "description": "The Fair Analytics client API",
   "jsnext:main": "index.js",
   "module": "dist/fair-analytics-client-api.es.js",
